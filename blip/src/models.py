@@ -14,6 +14,7 @@ from blip.src.clebschGordan import clebschGordan
 from blip.src.astro import Population
 from blip.src.instrNoise import instrNoise
 import blip.src.astro as astro
+from blip.src.prior import powerlaw_prior, fixedpowerlaw_prior, instr_noise_prior
 
 from jax import config
 config.update("jax_enable_x64", True)
@@ -122,7 +123,7 @@ class submodel(fast_geometry,clebschGordan,instrNoise):
                 raise ValueError("Unknown specification of 'tdi_lev'; can be 'michelson', 'xyz', or 'aet'.")
             if not injection:
                 ## prior transform
-                self.prior = self.instr_noise_prior
+                self.prior = instr_noise_prior()
                 ## covariance calculation
                 self.cov = self.compute_cov_noise
             else:
@@ -192,7 +193,7 @@ class submodel(fast_geometry,clebschGordan,instrNoise):
             self.omegaf = self.powerlaw_spectrum
             self.fancyname = "Power Law"+submodel_count
             if not injection:
-                self.spectral_prior = self.powerlaw_prior
+                self.spectral_prior = powerlaw_prior()
             else:
                 self.truevals[r'$\alpha$'] = self.injvals['alpha']
                 self.truevals[r'$\log_{10} (\Omega_0)$'] = self.injvals['log_omega0']
@@ -203,7 +204,7 @@ class submodel(fast_geometry,clebschGordan,instrNoise):
             self.omegaf = self.twothirdspowerlaw_spectrum
             self.fancyname = r'$\alpha=2/3$'+" Power Law"+submodel_count
             if not injection:
-                self.spectral_prior = self.fixedpowerlaw_prior
+                self.spectral_prior = fixedpowerlaw_prior() #self.fixedpowerlaw_prior
             else:
                 self.truevals[r'$\log_{10} (\Omega_0)$'] = self.injvals['log_omega0']
         elif self.spectral_model_name == 'brokenpowerlaw':
@@ -367,7 +368,7 @@ class submodel(fast_geometry,clebschGordan,instrNoise):
 
             if not injection:
                 ## prior transform
-                self.prior = self.isotropic_prior
+                self.prior = self.isotropic_prior()
                 self.cov = self.compute_cov_isgwb
             else:
                 ## Tell the submodel how to handle the injection response matrix when it's computed later on
@@ -970,7 +971,7 @@ class submodel(fast_geometry,clebschGordan,instrNoise):
     #############################
     ##          Priors         ##
     #############################
-    def isotropic_prior(self,theta):
+    def isotropic_prior(self):
         '''
         Isotropic prior transform. Just serves as a wrapper for the spectral prior, as no additional foofaraw is necessary.
         
@@ -987,7 +988,8 @@ class submodel(fast_geometry,clebschGordan,instrNoise):
             theta with each element rescaled for the spectral parameters.
             
         '''
-        return self.spectral_prior(theta)
+        #return self.spectral_prior(theta)
+        return self.spectral_prior
     
     def fixedsky_prior(self,theta):
         '''
@@ -1133,7 +1135,7 @@ class submodel(fast_geometry,clebschGordan,instrNoise):
         return spectral_theta+mw_theta
         
         
-    def instr_noise_prior(self,theta):
+    """def instr_noise_prior(self,theta):
 
 
         '''
@@ -1161,12 +1163,12 @@ class submodel(fast_geometry,clebschGordan,instrNoise):
         log_Np = -5*log_Np - 39
         log_Na = -5*log_Na - 46
 
-        return [log_Np, log_Na]
-    
+        return [log_Np, log_Na]"""
+    '''
     def powerlaw_prior(self,theta):
 
 
-        '''
+        
         Prior function for an isotropic stochastic backgound analysis.
 
         Parameters
@@ -1181,7 +1183,7 @@ class submodel(fast_geometry,clebschGordan,instrNoise):
         theta   :   float
             theta with each element rescaled. The elements are  interpreted as alpha and log(Omega0)
 
-        '''
+        
 
 
         # Unpack: Theta is defined in the unit cube
@@ -1190,11 +1192,11 @@ class submodel(fast_geometry,clebschGordan,instrNoise):
         log_omega0  = -26*theta[1] + 12
         
         return [alpha, log_omega0]
-    
-    def fixedpowerlaw_prior(self,theta):
+    '''
+    """def fixedpowerlaw_prior(self,theta):
 
 
-        '''
+        
         Prior function for a power law with fixed slope.
         
         Parameters
@@ -1209,14 +1211,14 @@ class submodel(fast_geometry,clebschGordan,instrNoise):
         theta   :   float
             theta with each element rescaled. The elements are  interpreted as alpha and log(Omega0)
 
-        '''
+        
 
 
         # Unpack: Theta is defined in the unit cube
         # Transform to actual priors
         log_omega0  = -26*theta[0] + 12
         
-        return [log_omega0]
+        return [log_omega0]"""
     
     def sobbh_powerlaw_prior(self,theta):
 
@@ -2073,7 +2075,7 @@ class Model():
         self.rmat = rmat
     
 #    @jax.jit
-    def prior(self,unit_theta):
+    def prior(self, unit_theta):
         '''
         Unified prior function to interatively perform prior draws for each submodel in the proper order
         

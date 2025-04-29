@@ -2,7 +2,7 @@
 
 import pickle
 import numpy as np
-import sys, os, shutil, configparser, subprocess
+import sys, os, shutil, subprocess
 sys.path.append(os.getcwd()) ## this lets python find src
 from blip.src.lisa import LISA
 from blip.src.emcee_engine import emcee_engine
@@ -14,7 +14,6 @@ from blip.tools.plotmaker import cornermaker
 from blip.tools.plotmaker import mapmaker
 from blip.tools.plotmaker import fitmaker
 from blip.tools.input_handler import load_input
-import matplotlib.pyplot as plt
 from multiprocessing import Pool
 import time
 

@@ -276,3 +276,4 @@ def load_input(paramsfile=paramsfile):
         else:
             params['checkpoint_interval']   = int(config.get("run_params", "checkpoint_interval", fallback=3600))
 
+    return params, inj

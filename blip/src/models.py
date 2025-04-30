@@ -23,7 +23,7 @@ import jax.numpy as jnp
 from jax.tree_util import register_pytree_node_class
 
 
-class submodel(fast_geometry,clebschGordan,instrNoise):
+class submodel(fast_geometry, clebschGordan, instrNoise):
     '''
     Modular class that can represent either an injection or an analysis model. Will have different attributes depending on use case.
     
@@ -32,7 +32,8 @@ class submodel(fast_geometry,clebschGordan,instrNoise):
     New models (injection or analysis) should be added here.
     
     '''
-    def __init__(self,params,inj,submodel_name,fs,f0,tsegmid,injection=False,suffix='',parallel_response=False):
+    def __init__(self, params, inj, submodel_name, fs, f0, tsegmid,
+                 injection=False, suffix='', parallel_response=False):
         '''
         Each submodel should be defined as "[spectral]_[spatial]", save for the noise model, which is just "noise".
         
@@ -77,7 +78,9 @@ class submodel(fast_geometry,clebschGordan,instrNoise):
         elif len(submodel_split) == 2:
             submodel_count = ' ({})'.format(submodel_split[1])
         else:
-            raise ValueError("'{}' is not a valid submodel/component specfication.".format(submodel_full_name))
+            raise ValueError(
+                f"{submodel_full_name} is not a valid submodel/component specfication."
+                )
         
         if submodel_full_name in params['alias'].keys():
             self.alias = params['alias'][submodel_full_name]

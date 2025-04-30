@@ -4,7 +4,7 @@ import sys, os, configparser
 sys.path.append(os.getcwd()) ## this lets python find src
 
 
-def load_input(paramsfile=paramsfile):
+def load_input(paramsfile):
 #  --------------- Read the params file --------------------------------
 
     # Initialize Dictionaries
@@ -227,8 +227,8 @@ def load_input(paramsfile=paramsfile):
     params['FixSeed']            = int(config.get("run_params", "FixSeed", fallback=0))
     if params['FixSeed']:
         params['seed']               = int(config.get("run_params", "seed"))
-    nthread                      = int(config.get("run_params", "Nthreads", fallback=1))
-    N_GPU                        = int(config.get("run_params", "N_GPU", fallback=0))
+    params['nthread']                      = int(config.get("run_params", "Nthreads", fallback=1))
+    params['N_GPU']                        = int(config.get("run_params", "N_GPU", fallback=0))
     
     
     params['colormap']       = str(config.get("run_params", "colormap", fallback='magma'))    
@@ -237,8 +237,8 @@ def load_input(paramsfile=paramsfile):
     params['sampler'] = str(config.get("run_params", "sampler"))
     
     ## only numpyro has GPU support
-    if N_GPU > 0 and params['sampler']!='numpyro':
-        raise ValueError("Only numpyro supports GPU acceleration but N_GPU ({}) > 0 and sampler is {}.".format(N_GPU,params['sampler']))
+    if params['N_GPU'] > 0 and params['sampler']!='numpyro':
+        raise ValueError("Only numpyro supports GPU acceleration but N_GPU ({}) > 0 and sampler is {}.".format(params['N_GPU'], params['sampler']))
     
     ## sampler setup and late-time imports to reduce dependencies
     ## dynesty
@@ -253,12 +253,16 @@ def load_input(paramsfile=paramsfile):
         params['Nsamples'] = int(config.get("run_params", "Nsamples",fallback=1000))
     ## numpyro
     elif params['sampler'] == 'numpyro':
-        if nthread > 1:
-            os.environ["XLA_FLAGS"] = '--xla_force_host_platform_device_count={}'.format(nthread)
+        if params['nthread'] > 1:
+            os.environ["XLA_FLAGS"] = '--xla_force_host_platform_device_count={}'.format(params['nthread'])
         from blip.src.numpyro_engine import numpyro_engine
         params['show_progress'] = int(config.get("run_params", "show_progress", fallback=1))
         params['Nburn'] = int(config.get("run_params", "Nburn",fallback=1000))
         params['Nsamples'] = int(config.get("run_params", "Nsamples",fallback=1000))
+
+    elif params['sampler'] == 'eryn':
+        params['nwalkers'] = int(config.get("run_params", "nwalkers",fallback=10))
+        params['nsteps'] = int(config.get("run_params", "nsteps", fallback=5000))
         
     else:
         raise ValueError("Unknown sampler. Supported samplers: 'dynesty', 'emcee', and 'numpyro'.")

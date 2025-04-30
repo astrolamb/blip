@@ -42,8 +42,11 @@ class eryn_engine():
         ## get initial samples on the unit cube
         #init_samples = np.array([rng.uniform(0, 1, nwalkers)
         #                         for ii in range(Npar)]).T
-        init_samples = np.array([priors.priors_in[p].rvs() for p in priors.priors_in]).T
-        
+        #init_samples = np.array([priors.priors_in[p].rvs() for p in priors.priors_in]).T
+        init_samples = priors.rvs(size=(nwalkers,))
+
+        parameters = model.parameters['all']
+
         ensemble = EnsembleSampler(
             nwalkers=nwalkers,
             ndims=lisaobj.Model.Npar,
@@ -51,7 +54,7 @@ class eryn_engine():
             priors=priors,
         )
 
-        return ensemble, init_samples
+        return ensemble, parameters, init_samples
 
     @staticmethod
     def run_engine(engine, nsteps, init_samples, burn=100, thin_by=5,
@@ -62,6 +65,6 @@ class eryn_engine():
         out = engine.run_mcmc(init_samples, nsteps, burn=burn,
                               progress=progress, thin_by=thin_by)
 
-        samples = engine.get_chain()['model_0'].reshape(-1, engine.ndim)
+        samples = engine.get_chain()['model_0'].reshape(-1, )
 
         return samples

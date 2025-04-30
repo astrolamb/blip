@@ -1,4 +1,4 @@
-Metadata-Version: 2.2
+Metadata-Version: 2.4
 Name: blip
 Version: 0.0.0
 Summary: A Bayesian inference package for characterizing stochastic backgrounds and foregrounds with LISA.
@@ -34,6 +34,7 @@ Dynamic: classifier
 Dynamic: description
 Dynamic: home-page
 Dynamic: license
+Dynamic: license-file
 Dynamic: requires-dist
 Dynamic: requires-python
 Dynamic: summary

@@ -103,14 +103,14 @@ def blip(paramsfile='params.ini',resume=False):
         # Create engine
         if not resume:
             # multiprocessing
-            if nthread > 1:
-                pool = Pool(nthread)
+            if params['nthread'] > 1:
+                pool = Pool(params['nthread'])
             else:
                 pool = None
-            engine, parameters = dynesty_engine().define_engine(lisa, params, nlive, nthread, randst, pool=pool)    
+            engine, parameters = dynesty_engine().define_engine(lisa, params, nlive, params['nthread'], randst, pool=pool)    
         else:
             pool = None
-            if nthread > 1:
+            if params['nthread'] > 1:
                 print("Warning: Nthread > 1, but multiprocessing is not supported when resuming a run. Pool set to None.")
                 ## To anyone reading this and wondering why:
                 ## The pickle calls used by Python's multiprocessing fail when trying to run the sampler after saving/reloading it.
@@ -137,7 +137,7 @@ def blip(paramsfile='params.ini',resume=False):
             post_samples, logz, logzerr = dynesty_engine.run_engine(engine)
             t2= time.time()
             print("Elapsed time to converge: {} s".format(t2-t1))
-        if nthread > 1:
+        if params['nthread'] > 1:
             engine.pool.close()
             engine.pool.join()
         # Save posteriors to file
@@ -147,8 +147,8 @@ def blip(paramsfile='params.ini',resume=False):
 
     elif params['sampler'] == 'emcee':
         # multiprocessing
-        if nthread>1:
-            pool=Pool(nthread)
+        if params['nthread']>1:
+            pool=Pool(params['nthread'])
         else:
             pool=None
 
@@ -174,11 +174,11 @@ def blip(paramsfile='params.ini',resume=False):
             ## set initial chain to None
             chain = None
             
-            if N_GPU > 0:
+            if params['N_GPU'] > 0:
                 use_gpu = True
             else:
                 use_gpu = False
-            engine, parameters, rng_key = numpyro_engine.define_engine(lisa, params['Nburn'], Nrun, nthread, params['show_progress'], params['seed'], gpu=use_gpu)
+            engine, parameters, rng_key = numpyro_engine.define_engine(lisa, params['Nburn'], Nrun, params['nthread'], params['show_progress'], params['seed'], gpu=use_gpu)
             lisaModel = lisa.Model
             
         else:
@@ -226,9 +226,10 @@ def blip(paramsfile='params.ini',resume=False):
         np.savetxt(params['out_dir'] + "/post_samples.txt",post_samples)
     
     elif params['sampler'] == 'eryn':
-        engine, init_samples = eryn_engine.define_engine(lisa, params['nwalkers'])
+        engine, parameters, init_samples = eryn_engine.define_engine(lisa, params['nwalkers'])
         post_samples = eryn_engine.run_engine(engine, params['nsteps'], init_samples)
-        np.savetxt(params['out_dir'] + "/post_samples.txt",post_samples)
+        post_samples = post_samples.reshape(-1, lisa.Model.Npar)
+        np.save(params['out_dir'] + "/post_samples.npy", post_samples)
 
     else:
         raise TypeError('Unknown sampler model chosen. Only dynesty, numpyro, eryn, & emcee are supported')

@@ -15,7 +15,7 @@ cython_response.c
 cython_response.html
 /Prev
 /.git
-BLiP.egg-info
+BLiP.egg-info/*
 mldcparams*
 owndata*
 eogtest*
@@ -31,3 +31,4 @@ WD_Galactic_Foreground.ipynb
 quick_*
 build/*
 params_run*
+.DS_Store

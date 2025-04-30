@@ -14,7 +14,7 @@ from blip.src.clebschGordan import clebschGordan
 from blip.src.astro import Population
 from blip.src.instrNoise import instrNoise
 import blip.src.astro as astro
-from blip.src.prior import powerlaw_prior, fixedpowerlaw_prior, instr_noise_prior
+from blip.src.prior import powerlaw_prior as eryn_pl, fixedpowerlaw_prior as eryn_fpl, instr_noise_prior as eryn_instr_noise_prior
 
 from jax import config
 config.update("jax_enable_x64", True)
@@ -126,7 +126,10 @@ class submodel(fast_geometry, clebschGordan, instrNoise):
                 raise ValueError("Unknown specification of 'tdi_lev'; can be 'michelson', 'xyz', or 'aet'.")
             if not injection:
                 ## prior transform
-                self.prior = instr_noise_prior()
+                if params['sampler'] == 'eryn':
+                    self.prior = eryn_instr_noise_prior()
+                else:
+                    self.prior = self.instr_noise_prior
                 ## covariance calculation
                 self.cov = self.compute_cov_noise
             else:
@@ -196,7 +199,10 @@ class submodel(fast_geometry, clebschGordan, instrNoise):
             self.omegaf = self.powerlaw_spectrum
             self.fancyname = "Power Law"+submodel_count
             if not injection:
-                self.spectral_prior = powerlaw_prior()
+                if params['sampler'] == 'eryn':
+                    self.spectral_prior = eryn_pl()
+                else:
+                    self.spectral_prior = self.powerlaw_prior
             else:
                 self.truevals[r'$\alpha$'] = self.injvals['alpha']
                 self.truevals[r'$\log_{10} (\Omega_0)$'] = self.injvals['log_omega0']
@@ -207,7 +213,10 @@ class submodel(fast_geometry, clebschGordan, instrNoise):
             self.omegaf = self.twothirdspowerlaw_spectrum
             self.fancyname = r'$\alpha=2/3$'+" Power Law"+submodel_count
             if not injection:
-                self.spectral_prior = fixedpowerlaw_prior() #self.fixedpowerlaw_prior
+                if params['sampler'] == 'eryn':
+                    self.spectral_prior = eryn_fpl()
+                else:
+                    self.fixedpowerlaw_prior
             else:
                 self.truevals[r'$\log_{10} (\Omega_0)$'] = self.injvals['log_omega0']
         elif self.spectral_model_name == 'brokenpowerlaw':
@@ -1275,7 +1284,7 @@ class submodel(fast_geometry, clebschGordan, instrNoise):
         return spectral_theta+mw_theta
         
         
-    """def instr_noise_prior(self,theta):
+    def instr_noise_prior(self,theta):
 
 
         '''
@@ -1303,12 +1312,12 @@ class submodel(fast_geometry, clebschGordan, instrNoise):
         log_Np = -5*log_Np - 39
         log_Na = -5*log_Na - 46
 
-        return [log_Np, log_Na]"""
-    '''
+        return [log_Np, log_Na]
+    
     def powerlaw_prior(self,theta):
 
 
-        
+        '''
         Prior function for an isotropic stochastic backgound analysis.
 
         Parameters
@@ -1322,7 +1331,7 @@ class submodel(fast_geometry, clebschGordan, instrNoise):
 
         theta   :   float
             theta with each element rescaled. The elements are  interpreted as alpha and log(Omega0)
-
+        '''
         
 
 
@@ -1332,11 +1341,11 @@ class submodel(fast_geometry, clebschGordan, instrNoise):
         log_omega0  = -26*theta[1] + 12
         
         return [alpha, log_omega0]
-    '''
-    """def fixedpowerlaw_prior(self,theta):
+    
+    def fixedpowerlaw_prior(self,theta):
 
 
-        
+        '''
         Prior function for a power law with fixed slope.
         
         Parameters
@@ -1350,7 +1359,7 @@ class submodel(fast_geometry, clebschGordan, instrNoise):
 
         theta   :   float
             theta with each element rescaled. The elements are  interpreted as alpha and log(Omega0)
-
+        '''
         
 
 
@@ -1358,7 +1367,7 @@ class submodel(fast_geometry, clebschGordan, instrNoise):
         # Transform to actual priors
         log_omega0  = -26*theta[0] + 12
         
-        return [log_omega0]"""
+        return [log_omega0]
     
     def sobbh_powerlaw_prior(self,theta):
 

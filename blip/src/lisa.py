@@ -8,6 +8,9 @@ from blip.src.fast_geometry import fast_geometry
 from blip.src.utils import ensure_color_matching
 import matplotlib.pyplot as plt
 
+# constants
+c = 2.99792458e8  # speed of light [m/s]
+
 class LISA(LISAdata, Model):
 
     '''
@@ -72,8 +75,7 @@ class LISA(LISAdata, Model):
         self.r1, self.r2, self.r3, self.fdata, self.tsegstart, self.tsegmid = self.tser2fser(self.h1, self.h2, self.h3, self.timearray)
 
         # Charactersitic frequency. Define f0
-        cspeed = 3e8
-        fstar = cspeed/(2*np.pi*self.armlength)
+        fstar = c / (2*np.pi*self.armlength)
         self.f0 = self.fdata/(2*fstar)
         
     def makedata(self):
@@ -94,7 +96,7 @@ class LISA(LISAdata, Model):
         ## leave out f = 0
         frange = np.fft.rfftfreq(Npersplice, 1.0/self.params['fs'])[1:]
         ## the charecteristic frequency of LISA, and the scaled frequency array
-        fstar = 3e8/(2*np.pi*self.armlength)
+        fstar = c / (2*np.pi*self.armlength)
         f0 = frange/(2*fstar)
         
         ## Build the Injection object
@@ -136,8 +138,7 @@ class LISA(LISAdata, Model):
         self.r1, self.r2, self.r3, self.fdata, self.tsegstart, self.tsegmid = self.tser2fser(self.h1, self.h2, self.h3, self.timearray)
 
         # Charactersitic frequency. Define f0
-        cspeed = 3e8
-        fstar = cspeed/(2*np.pi*self.armlength)
+        fstar = c / (2*np.pi*self.armlength)
         self.f0 = self.fdata/(2*fstar)
         
     def make_data_correlation_matrix(self):
@@ -169,7 +170,7 @@ class LISA(LISAdata, Model):
         
         '''
         #Charactersitic frequency
-        fstar = 3e8/(2*np.pi*self.armlength)
+        fstar = c / (2*np.pi*self.armlength)
         # define f0 = f/2f*
         f0_data = self.fdata/(2*fstar)
         fast_rx = fast_geometry(self.params)

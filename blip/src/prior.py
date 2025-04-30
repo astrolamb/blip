@@ -31,7 +31,7 @@ def powerlaw_prior():
         #alpha = dist.Uniform(-5, 5)
         alpha = uniform_dist(-5, 5)
         #log_omega0 = dist.Uniform(-26, -14)
-        log_omega0 = uniform_dist(-26, -14)
+        log_omega0 = uniform_dist(-10, -2)
 
         return [alpha, log_omega0]
         
@@ -60,7 +60,7 @@ def fixedpowerlaw_prior():
     # Transform to actual priors
     #log_omega0  = -26*theta[0] + 12
     #log_omega0 = dist.Uniform(-26, -14)
-    log_omega0 = uniform_dist(-26, -14)
+    log_omega0 = uniform_dist(-10, -2)
 
     return [log_omega0]
 

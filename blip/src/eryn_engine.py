@@ -4,13 +4,16 @@ from eryn.prior import ProbDistContainer
 
 #@staticmethod
 def build_prior_container(lisaobj):
+    """
+    utility function to build eryn prior container
+    """
     submodels = lisaobj.Model.submodels
 
     prior_dict = dict()
     ct = 0
     for sm in submodels:
-        for jj in range(len(submodels[sm].prior)):
-            prior_dict[ct] = submodels[sm].prior[jj]
+        for p in submodels[sm].prior:
+            prior_dict[ct] = p
             ct += 1
     
     prior = ProbDistContainer(prior_dict)
@@ -26,6 +29,28 @@ class eryn_engine():
 
     @classmethod
     def define_engine(cls, lisaobj, nwalkers,):
+        """
+        Class method to initialise the eryn EnsembleSampler.
+
+        Parameters
+        ----------
+        lisaobj :
+            LISA data object
+        
+        nwalkers : int
+            number of ensemble walkers
+
+        Returns
+        -------
+        ensemble
+            The initialised eryn EnsembleSampler
+        
+        parameters : dict
+            A dictionary of model parameters
+        
+        init_samples
+            An array of initial coordinates for each ensemble walker
+        """
 
         model = lisaobj.Model
 
@@ -34,23 +59,17 @@ class eryn_engine():
         else:
             seed = None
         rng = np.random.default_rng(seed=seed)
-
-        Npar = model.Npar
         
         priors = build_prior_container(lisaobj)
 
-        ## get initial samples on the unit cube
-        #init_samples = np.array([rng.uniform(0, 1, nwalkers)
-        #                         for ii in range(Npar)]).T
-        #init_samples = np.array([priors.priors_in[p].rvs() for p in priors.priors_in]).T
         init_samples = priors.rvs(size=(nwalkers,))
 
         parameters = model.parameters['all']
 
         ensemble = EnsembleSampler(
             nwalkers=nwalkers,
-            ndims=lisaobj.Model.Npar,
-            log_like_fn=lisaobj.Model.likelihood,
+            ndims=model.Npar,
+            log_like_fn=model.likelihood,
             priors=priors,
         )
 
@@ -60,7 +79,7 @@ class eryn_engine():
     def run_engine(engine, nsteps, init_samples, burn=100, thin_by=5,
                    progress=True):
         '''
-        
+        Run the eryn ensemble sampler
         '''
         out = engine.run_mcmc(init_samples, nsteps, burn=burn,
                               progress=progress, thin_by=thin_by)

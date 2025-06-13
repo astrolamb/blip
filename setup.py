@@ -12,6 +12,7 @@ setup(
     url="https://github.com/sharanbngr/blip",
     author="Sharan Banagiri, Alexander Criswell, and others",
     author_email="sharan.banagiri@gmail.com",
+    version="2.0.2",
     license="MIT",
     packages=["blip",
         "blip.src",
@@ -26,7 +27,7 @@ setup(
         "scipy",
         "astropy",
         "pandas",
-        "chainconsumer==0.34.0",
+        "corner",
         "sympy",
         "legwork",
         "dill",
@@ -35,6 +36,8 @@ setup(
         "numpyro",
         "jax"
     ],
+    extras_require={
+            "gpu":["jax[cuda12]"]},
     classifiers=[
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.10",
